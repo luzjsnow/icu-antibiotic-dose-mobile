@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b3d60" />
+  <title>成人 ICU 抗菌药物剂量工具 · 第 17 版手机离线版</title>
+  <style>
+    :root {
+      --primary: #0b4f7c;
+      --primary-dark: #073554;
+      --accent: #0f766e;
+      --accent-soft: #e6f5f3;
+      --bg: #f3f6fa;
+      --card: #ffffff;
+      --text: #142230;
+      --muted: #556575;
+      --border: #dfe7ef;
+      --warn-bg: #fff8e6;
+      --warn-border: #f3cc73;
+      --warn-text: #7c4d03;
+      --radius: 16px;
+      --shadow: 0 8px 24px rgba(11, 53, 84, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 40px;
+    }
+
+    .wx-banner {
+      display: none;
+      background: linear-gradient(90deg, #b45309, #d97706);
+      color: #fff;
+      padding: 12px 16px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 4px 12px rgba(180, 83, 9, 0.25);
+    }
+
+    .wx-banner.show {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .wx-banner button {
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .hero {
+      background: linear-gradient(145deg, #073554 0%, #0b4f7c 55%, #0f766e 100%);
+      color: #fff;
+      padding: 32px 18px 54px;
+      text-align: center;
+    }
+
+    .hero-inner {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .badge-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      backdrop-filter: blur(4px);
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(22px, 5.2vw, 30px);
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .hero p {
+      margin: 0 auto;
+      max-width: 560px;
+      font-size: 14.5px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .container {
+      max-width: 760px;
+      margin: -34px auto 0;
+      padding: 0 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .device-tip {
+      background: #e9f4ff;
+      border: 1px solid #bfdcf7;
+      color: #0b4f7c;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 13.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .cards-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      position: relative;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card.recommended {
+      border: 2px solid var(--accent);
+      box-shadow: 0 10px 28px rgba(15, 118, 110, 0.14);
+    }
+
+    .rec-tag {
+      display: none;
+      position: absolute;
+      top: -11px;
+      right: 16px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.3px;
+    }
+
+    .card.recommended .rec-tag {
+      display: inline-block;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .os-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .os-icon.android {
+      background: #e6f6ec;
+      color: #15803d;
+    }
+
+    .os-icon.ios {
+      background: #eef2ff;
+      color: #3730a3;
+    }
+
+    .os-icon.zip {
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .card-sub {
+      margin: 2px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.08s ease, opacity 0.15s ease, background 0.15s ease;
+      flex: 1 1 220px;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-accent:hover {
+      background: #0c5e58;
+    }
+
+    .btn-outline {
+      background: #f8fafc;
+      color: var(--primary);
+      border: 1px solid #cbd5e1;
+    }
+
+    .btn-outline:hover {
+      background: #eef4f9;
+    }
+
+    .file-meta {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      word-break: break-all;
+    }
+
+    .steps {
+      margin: 12px 0 0;
+      padding: 14px 16px 14px 32px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid #e7edf4;
+      font-size: 13.8px;
+      color: #243447;
+    }
+
+    .steps li {
+      margin-bottom: 6px;
+    }
+
+    .steps li:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 16.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checklist {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 11px 12px;
+      background: #f8fafc;
+      border: 1px solid #e7edf4;
+      border-radius: 11px;
+      font-size: 13.8px;
+    }
+
+    .checklist input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .qr-grid {
+      display: grid;
+      grid-template-columns: 168px 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .qr-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .qr-box img {
+      width: 100%;
+      max-width: 148px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .qr-caption {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .url-pill {
+      display: block;
+      background: #f1f5f9;
+      border: 1px solid #dce4ee;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      color: #0b4f7c;
+      word-break: break-all;
+      margin: 8px 0 12px;
+    }
+
+    .notice {
+      background: var(--warn-bg);
+      border: 1px solid var(--warn-border);
+      color: var(--warn-text);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      font-size: 13.2px;
+      line-height: 1.65;
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12.5px;
+      margin-top: 6px;
+    }
+
+    .footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    /* 微信防拦截引导遮罩 */
+    .wx-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 25, 42, 0.84);
+      z-index: 100;
+      padding: 24px 20px;
+      color: #fff;
+    }
+
+    .wx-modal.show {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .wx-arrow {
+      font-size: 40px;
+      line-height: 1;
+      margin-right: 14px;
+      margin-bottom: 10px;
+      animation: bounce 1.2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+
+    .wx-modal-card {
+      width: 100%;
+      max-width: 360px;
+      background: #fff;
+      color: var(--text);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 0 auto;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .wx-modal-card h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      color: var(--primary-dark);
+    }
+
+    .wx-modal-card p {
+      margin: 0 0 12px;
+      font-size: 14px;
+      color: #334155;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(15, 23, 42, 0.92);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 120;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 560px) {
+      .qr-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .qr-box {
+        max-width: 200px;
+        margin: 0 auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="wxBanner" class="wx-banner">
+    <span>检测到在微信/QQ内置浏览器打开，下载安装包可能会被拦截。请点右上角 <strong>···</strong> 选择<strong>「在浏览器打开」</strong>。</span>
+    <button type="button" onclick="openWxModal()">查看指引</button>
+  </div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="badge-row">
+        <span class="badge">第 17 版手机离线版</span>
+        <span class="badge">断网本机运行</span>
+        <span class="badge">Android &amp; iPhone</span>
+      </div>
+      <h1>成人 ICU 抗菌药物剂量工具</h1>
+      <p>计算引擎、模拟病例与证据框架均保存在手机本地，安装后无需联网即可随时查阅与模拟核算。</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="deviceTip" class="device-tip">
+      <span id="deviceText">正在识别你的设备系统，请选择对应的离线安装包：</span>
+      <button type="button" class="btn btn-outline" style="flex:0 0 auto;padding:6px 12px;font-size:12.5px;" onclick="copyPageUrl()">复制链接</button>
+    </div>
+
+    <div id="cardsStack" class="cards-stack">
+      <!-- 安卓版 -->
+      <section id="cardAndroid" class="card" data-os="android">
+        <span class="rec-tag">推荐 · 当前设备</span>
+        <div class="card-head">
+          <div class="os-icon android">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.65-.06-.83.22l-1.88 3.24a11.463 11.463 0 00-8.94 0L5.65 5.67c-.19-.29-.54-.38-.84-.22-.3.16-.42.54-.26.85L6.4 9.48A10.78 10.78 0 002 18h20a10.78 10.78 0 00-4.4-8.52zM7 15.25a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5zm10 0a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5z"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="card-title">安卓手机离线版（APK）</h2>
+            <p class="card-sub">适用 Android 8.0 或更新版本 · 约 149 KB</p>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <a
+            class="btn btn-accent dl-link"
+            href="./downloads/ICU-Abx-v17-Android.apk"
+            download="ICU抗菌药物_v17_安卓.apk"
+          >下载安卓安装包 (.apk)</a>
+        </div>
+        <div class="file-meta">文件：ICU-Abx-v17-Android.apk（原名：ICU抗菌药物_v17_安卓.apk）</div>
+
+        <ol class="steps">
+          <li>下载并将安装包保存到手机本地。</li>
+          <li>用手机的<strong>文件管理器</strong>点击该 APK 文件安装；系统询问权限时，仅需允许当前文件管理器安装此应用。</li>
+          <li>安装完成后点击桌面的<strong>“ICU 抗菌药物”</strong>图标，打开页面应看到<strong>“第 17 版离线”</strong>。</li>
+        </ol>
+      </section>
+
+      <!-- iPhone 版 -->
+      <section id="cardIos" class="card" data-os="ios">
+        <span class="rec-tag">推荐 · 当前设备</span>
+        <div class="card-head">
+          <div class="os-icon ios">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.96 6.32c.68-.83 1.14-1.98 1.01-3.13-.98.04-2.17.65-2.87 1.48-.63.72-1.18 1.89-1.03 3.01 1.09.08 2.21-.55 2.89-1.36z"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="card-title">iPhone 离线版（Scriptable）</h2>
+            <p class="card-sub">适用 iOS 15.5 或更新版本 · 约 621 KB</p>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <a
+            class="btn btn-primary dl-link"
+            href="./downloads/ICU-Abx-v17-iPhone.scriptable"
+            download="ICU抗菌药物_v17_iPhone.scriptable"
+          >下载 iPhone 离线包 (.scriptable)</a>
+          <a
+            class="btn btn-outline"
+            href="https://apps.apple.com/app/scriptable/id1405459188"
+            target="_blank"
+            rel="noopener noreferrer"
+          >App Store 安装免费 Scriptable</a>
+        </div>
+        <div class="file-meta">文件：ICU-Abx-v17-iPhone.scriptable（原名：ICU抗菌药物_v17_iPhone.scriptable）</div>
+
+        <ol class="steps">
+          <li>先在 App Store 安装免费的 <strong>Scriptable</strong>（仅初次下载 App 需要联网）。</li>
+          <li>使用 <strong>Safari 浏览器</strong>点击上方按钮下载文件，并保存到“文件”App 的<strong>“我的 iPhone”</strong>中。</li>
+          <li>在“文件”App 中<strong>长按</strong>刚保存的文件，点<strong>“共享”</strong>并选择 <strong>Scriptable</strong>（如未显示，点“更多”查找）。</li>
+          <li>导入后打开 Scriptable，点击<strong>“ICU 抗菌药物 v17”</strong>运行，以后直接从这张卡片打开即可。</li>
+        </ol>
+      </section>
+    </div>
+
+    <!-- 完整打包下载 -->
+    <section class="card">
+      <div class="card-head">
+        <div class="os-icon zip">ZIP</div>
+        <div>
+          <h2 class="card-title">完整手机离线包（含双端与二维码）</h2>
+          <p class="card-sub">包含安卓 APK、iPhone Scriptable、安装说明与扫码海报，适合电脑存档或整包转发</p>
+        </div>
+      </div>
+      <div class="btn-group" style="margin-bottom:0;">
+        <a
+          class="btn btn-outline dl-link"
+          href="./downloads/ICU-Abx-v17-Offline-Bundle.zip"
+          download="成人ICU抗菌药物剂量工具_第17版手机离线包_含二维码.zip"
+        >下载完整 ZIP 压缩包</a>
+        <a
+          class="btn btn-outline"
+          href="./downloads/安装说明.txt"
+          target="_blank"
+        >查看纯文本安装说明</a>
+      </div>
+    </section>
+
+    <!-- 断网自检清单 -->
+    <section class="card">
+      <h2 class="section-title">安装后断网自检清单（飞行模式）</h2>
+      <p class="card-sub" style="margin-bottom:12px;">安装完成后请开启手机<strong>飞行模式</strong>，进入<strong>“模拟病例”</strong>核对以下三项：</p>
+      <ul class="checklist">
+        <li>
+          <input type="checkbox" id="chk1" />
+          <label for="chk1"><strong>稳定肾损害 · 美罗培南</strong>：示例显示 <code>1000 mg 每 12 小时</code>。</label>
+        </li>
+        <li>
+          <input type="checkbox" id="chk2" />
+          <label for="chk2"><strong>CRRT 连续运行 · 美罗培南方案对比</strong>：模型预计谷浓度约 <code>1.98</code> 和 <code>2.41 mg/L</code>，并提示临界值。</label>
+        </li>
+        <li>
+          <input type="checkbox" id="chk3" />
+          <label for="chk3"><strong>AKI 维持 · 金陵 PJP · SMX 峰样</strong>：模拟峰浓度 <code>215 mg/L</code> 高于参考，并提示下一剂前需复核的内容。</label>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 二维码分享卡片 -->
+    <section class="card">
+      <h2 class="section-title">扫码分享给同事</h2>
+      <div class="qr-grid">
+        <div class="qr-box">
+          <img src="./assets/qrcode.png" alt="扫码下载成人ICU抗菌药物剂量工具第17版" />
+          <div class="qr-caption">手机扫码直达本下载页</div>
+        </div>
+        <div>
+          <p style="margin:0;font-size:14px;color:#334155;">长按保存左侧二维码，或直接下载高清分享海报用于微信群通知、科室 PPT 或打印张贴。</p>
+          <span id="shareUrl" class="url-pill">https://luzjsnow.github.io/icu-antibiotic-dose-mobile/</span>
+          <div class="btn-group" style="margin:0;">
+            <a class="btn btn-outline" href="./assets/download-poster.png" download="成人ICU抗菌药物剂量工具_v17_扫码下载海报.png">保存高清分享海报</a>
+            <button type="button" class="btn btn-outline" onclick="copyPageUrl()">复制下载页链接</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 评审与使用声明 -->
+    <div class="notice">
+      <strong>离线运行与验证说明：</strong>计算、模拟病例和证据框架均在本机完成。点击证据原文链接可查看并复制地址（查阅外部原文需要联网）。本版已通过断网浏览器模拟和安卓安装包签名校验，尚未在安卓或 iPhone 真机上安装验证，仅供评审与教学模拟使用。
+    </div>
+
+    <footer class="footer">
+      托管仓库：<a href="https://github.com/luzjsnow/icu-antibiotic-dose-mobile" target="_blank" rel="noopener noreferrer">github.com/luzjsnow/icu-antibiotic-dose-mobile</a>
+    </footer>
+  </main>
+
+  <!-- 微信/QQ 引导弹窗 -->
+  <div id="wxModal" class="wx-modal" onclick="closeWxModal(event)">
+    <div class="wx-arrow">↗</div>
+    <div class="wx-modal-card" onclick="event.stopPropagation()">
+      <h3>请在系统浏览器中打开</h3>
+      <p>微信 / QQ 内置浏览器会限制直接下载 <code>.apk</code> 或 <code>.scriptable</code> 安装包。</p>
+      <ol class="steps" style="margin:0 0 14px;">
+        <li>点击屏幕右上角的 <strong>···</strong>（更多菜单）。</li>
+        <li>安卓用户选择<strong>「在浏览器打开」</strong>；iPhone 用户选择<strong>「在默认浏览器（Safari）打开」</strong>。</li>
+        <li>在浏览器中重新点击下载按钮即可顺利保存。</li>
+      </ol>
+      <div class="btn-group" style="margin:0;">
+        <button type="button" class="btn btn-primary" onclick="copyPageUrl()">复制链接手动打开</button>
+        <button type="button" class="btn btn-outline" onclick="closeWxModal()">我知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">已复制下载页链接</div>
+
+  <script>
+    (function () {
+      var ua = navigator.userAgent || "";
+      var isAndroid = /Android/i.test(ua);
+      var isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      var isWeChatOrQQ = /MicroMessenger|QQ\//i.test(ua);
+
+      var stack = document.getElementById("cardsStack");
+      var cardAndroid = document.getElementById("cardAndroid");
+      var cardIos = document.getElementById("cardIos");
+      var deviceText = document.getElementById("deviceText");
+      var wxBanner = document.getElementById("wxBanner");
+
+      if (isAndroid) {
+        cardAndroid.classList.add("recommended");
+        deviceText.textContent = "已识别为安卓设备，已为你置顶推荐安卓 APK 离线包。";
+      } else if (isIOS) {
+        cardIos.classList.add("recommended");
+        stack.insertBefore(cardIos, cardAndroid);
+        deviceText.textContent = "已识别为 iPhone / iPad，已为你置顶推荐 Scriptable 离线包。";
+      } else {
+        deviceText.textContent = "当前为电脑浏览器，你可以直接下载文件，或用手机扫描下方二维码直达本页。";
+      }
+
+      if (isWeChatOrQQ) {
+        wxBanner.classList.add("show");
+        var links = document.querySelectorAll(".dl-link");
+        for (var i = 0; i < links.length; i++) {
+          links[i].addEventListener("click", function (e) {
+            e.preventDefault();
+            openWxModal();
+          });
+        }
+      }
+    })();
+
+    function openWxModal() {
+      document.getElementById("wxModal").classList.add("show");
+    }
+
+    function closeWxModal() {
+      document.getElementById("wxModal").classList.remove("show");
+    }
+
+    function showToast(msg) {
+      var el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(function () {
+        el.classList.remove("show");
+      }, 2200);
+    }
+
+    function copyPageUrl() {
+      var url = "https://luzjsnow.github.io/icu-antibiotic-dose-mobile/";
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function () {
+          showToast("已复制下载页链接，可粘贴到浏览器打开");
+        }, function () {
+          fallbackCopy(url);
+        });
+      } else {
+        fallbackCopy(url);
+      }
+    }
+
+    function fallbackCopy(text) {
+      var input = document.createElement("textarea");
+      input.value = text;
+      input.style.position = "fixed";
+      input.style.opacity = "0";
+      document.body.appendChild(input);
+      input.focus();
+      input.select();
+      try {
+        document.execCommand("copy");
+        showToast("已复制下载页链接");
+      } catch (e) {
+        showToast("请手动长按复制页面地址");
+      }
+      document.body.removeChild(input);
+    }
+  </script>
+</body>
+</html>
